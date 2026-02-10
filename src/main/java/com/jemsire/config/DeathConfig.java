@@ -13,6 +13,7 @@ public class DeathConfig {
     private String deathAnnouncementFormat = "<red>{player} {deathCause}";
     private String deathLocationFormat = "<gold>Your last death position: <white>X:{x} Y:{y} Z:{z}";
     private String deathCauseReplacement = "was";
+    private Boolean updateCheck = true;
 
     public DeathConfig() {
     }
@@ -54,6 +55,13 @@ public class DeathConfig {
                     )
                     .add()
 
+                    .append(
+                            new KeyedCodec<Boolean>("UpdateCheck", Codec.BOOLEAN),
+                            (config, value, info) -> config.updateCheck = value != null ? value : true,
+                            (config, info) -> config.updateCheck
+                    )
+                    .add()
+
                     .build();
 
     public boolean isShowDeathMessage() {
@@ -61,6 +69,10 @@ public class DeathConfig {
     }
 
     public boolean isShowPosition() {
+        return showPosition;
+    }
+
+    public boolean getUpdateCheck() {
         return showPosition;
     }
 

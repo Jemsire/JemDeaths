@@ -1,5 +1,6 @@
 package com.jemsire.plugin;
 
+import com.hypixel.hytale.common.semver.Semver;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.util.Config;
@@ -7,11 +8,14 @@ import com.jemsire.commands.ReloadCommand;
 import com.jemsire.config.DeathConfig;
 import com.jemsire.events.OnPlayerDeathEvent;
 import com.jemsire.utils.Logger;
+import com.jemsire.utils.UpdateChecker;
 
 import javax.annotation.Nonnull;
 
 public class JemDeaths extends JavaPlugin {
     private static JemDeaths instance;
+
+    private final Semver version;
 
     public static JemDeaths get() {
         return instance;
@@ -22,6 +26,8 @@ public class JemDeaths extends JavaPlugin {
     public JemDeaths(@Nonnull JavaPluginInit init) {
         super(init);
         Logger.info("Starting JemDeaths Plugin...");
+
+        version = init.getPluginManifest().getVersion();
 
         // Registers the death message configuration
         this.deathConfig = this.withConfig("DeathConfig", DeathConfig.CODEC);
@@ -44,11 +50,30 @@ public class JemDeaths extends JavaPlugin {
     }
 
     @Override
+    protected void start() {
+//        if (isJemPlaceholdersEnabled()) {
+//            JemPlaceholdersAPI.registerExpansion(new JemAnnouncementsExpansion());
+//        }
+
+        if(deathConfig.get().getUpdateCheck()){
+            new UpdateChecker(version.toString()).checkForUpdatesAsync();
+        }
+
+        Logger.info("[JemAnnouncements] Started!");
+        Logger.info("[JemAnnouncements] Use /jemp help for commands");
+    }
+
+    @Override
     protected void shutdown(){
         Logger.info("Shutting down...");
 
         this.getCommandRegistry().shutdown();
         this.getEventRegistry().shutdown();
+
+        // Shutdown updater
+        if(deathConfig.get().getUpdateCheck()){
+            UpdateChecker.shutdown();
+        }
 
         deathConfig.save();
         Logger.info("Config Saved.");
