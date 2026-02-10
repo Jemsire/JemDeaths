@@ -69,4 +69,13 @@ public class JemDeaths extends JavaPlugin {
     public Config<DeathConfig> getDeathConfig() {
         return this.deathConfig;
     }
+
+    public boolean isJemPlaceholdersEnabled() {
+        try {
+            Class.forName("com.jemsire.jemplaceholders.api.JemPlaceholdersAPI");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }

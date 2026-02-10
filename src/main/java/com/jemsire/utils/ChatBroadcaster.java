@@ -4,6 +4,7 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.jemsire.plugin.JemDeaths;
+import com.jemsire.jemplaceholders.api.JemPlaceholdersAPI;
 
 import java.awt.*;
 
@@ -30,14 +31,19 @@ public class ChatBroadcaster {
                 Logger.warning("Universe not available for broadcasting");
                 return;
             }
-            
-            // Format message with colors if tags/codes are present, otherwise use plain text
-            Message msg = (TinyMsg.containsColorTags(message) || message.contains("&"))
-                ? TinyMsg.format(message)
-                : Message.raw(message);
-            
+
             universe.getPlayers().forEach(playerRef -> {
+                String newMessage = message;
                 try {
+                    if(JemDeaths.get().isJemPlaceholdersEnabled()){
+                        newMessage = JemPlaceholdersAPI.setPlaceholders(playerRef, newMessage);
+                    }
+
+                    // Format message with colors if tags/codes are present, otherwise use plain text
+                    Message msg = (TinyMsg.containsColorTags(newMessage) || newMessage.contains("&"))
+                            ? TinyMsg.format(newMessage)
+                            : Message.raw(newMessage);
+
                     playerRef.sendMessage(msg);
                 } catch (Exception e) {
                     Logger.warning("Failed to send message to player: " + e.getMessage());
@@ -58,6 +64,10 @@ public class ChatBroadcaster {
             if (playerRef == null) {
                 Logger.warning("PlayerRef is null, cannot send message");
                 return;
+            }
+
+            if(JemDeaths.get().isJemPlaceholdersEnabled()){
+                message = JemPlaceholdersAPI.setPlaceholders(playerRef, message);
             }
             
             // Format message with colors if tags/codes are present, otherwise use plain text
